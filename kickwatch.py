@@ -16,10 +16,10 @@ class Reward:
 		self.backers = backers
 
 	def display(self):
-	   	print("Name : " + self.name +  ", amount: " + self.amount +  ", backers: " + self.backers +  "/" + self.backerLimit + "Desc : " + self.desc + ".")
+	   	print("Name : " + self.name +  ", amount: " + str(self.amount) +  ", backers: " + str(self.backers) +  "/" + str(self.backerLimit) + "Desc : " + self.desc + ".")
 
 	def displayShort(self):
-		print(str(self.amount) + '$\t' + self.name  + ' ' + self.backers + '/' + self.backerLimit + ' backers')
+		print(str(self.amount) + '$\t' + self.name  + ' ' + str(self.backers) + '/' + str(self.backerLimit) + ' backers')
 
 	def hasBackerLimit(self):
 		return self.backerLimit > 0
