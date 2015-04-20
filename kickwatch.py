@@ -18,8 +18,8 @@ class Reward:
 	def display(self):
 	   	print("Name : " + self.name +  ", amount: " + str(self.amount) +  ", backers: " + str(self.backers) +  "/" + str(self.backerLimit) + "Desc : " + self.desc + ".")
 
-	def displayShort(self):
-		print(str(self.amount) + '$\t' + self.name  + ' ' + str(self.backers) + '/' + str(self.backerLimit) + ' backers')
+	def shortDescription(self):
+		return str(self.amount) + '$\t' + self.name  + ' ' + str(self.backers) + '/' + str(self.backerLimit) + ' backers'
 
 	def hasBackerLimit(self):
 		return self.backerLimit > 0
@@ -29,6 +29,9 @@ class Reward:
 
 	def isAvailable(self):
 		return not self.hasBackerLimit() or (self.hasBackerLimit() and not reward.isSoldOut())
+
+def log(text):
+	print("[" + time.strftime('%X %x %Z') + "] " + text)
 
 def decrement(number):
 	return int(number)-1
@@ -54,22 +57,22 @@ def showRewardsMenu():
 
 def checkReward(reward):
 	if reward.hasBackerLimit() and not reward.isSoldOut():
-		print("\n------\nREWARD IS AVAILABLE:\n")
-		print(reward.display())
-		print("\n------\n")
+		log("\n------\nREWARD IS AVAILABLE:\n")
+		log(reward.display())
+		log("\n------\n")
 		webbrowser.open_new_tab(url+"/pledge/new?ref=manage_pledge")
 		time.sleep(10)
 		sys.exit(0)
 	else:
-		print("No luck yet...")
+		log("No luck yet...")
 
 def populateRewards(rewardsArray):
 	
-	print("Fetching data...")
+	log("Fetching data...")
 	r  = requests.get(url)
 
 	data = r.text
-	print("Parsing data...")
+	log("Parsing data...")
 	soup = BeautifulSoup(data)
 
 	rewards_html = soup.find_all('li',class_='NS-projects-reward')
@@ -79,7 +82,7 @@ def populateRewards(rewardsArray):
 	skip = 0
 	for reward_html in rewards_html:
 		if skip:
-			print("Skipped reward")
+			log("Skipped reward")
 			skip -= 1
 			continue
 
@@ -122,7 +125,7 @@ while True:
 	populateRewards(rewards)
 	for index in rewardIndexes:
 		reward = rewards[index]
-		print("Reward [" + str(index+1) + "]")
-		print(reward.displayShort())
+		log("Reward [" + str(index+1) + "]")
+		log(reward.shortDescription())
 		checkReward(reward)
 	time.sleep(interval)
