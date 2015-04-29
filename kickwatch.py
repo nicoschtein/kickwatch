@@ -58,7 +58,7 @@ def showRewardsMenu():
 def checkReward(reward):
 	if reward.hasBackerLimit() and not reward.isSoldOut():
 		log("\n------\nREWARD IS AVAILABLE:\n")
-		log(reward.display())
+		log(reward.shortDescription())
 		log("\n------\n")
 		webbrowser.open_new_tab(url+"/pledge/new?ref=manage_pledge")
 		time.sleep(10)
