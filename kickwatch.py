@@ -7,6 +7,8 @@ import time
 import sys
 import webbrowser
 
+requests.packages.urllib3.disable_warnings()
+
 class Reward:
 	def __init__(self, name='', desc='', amount=0, backerLimit=-1, backers=0):
 		self.name = name
@@ -58,7 +60,7 @@ def showRewardsMenu():
 def checkReward(reward):
 	if reward.hasBackerLimit() and not reward.isSoldOut():
 		log("\n------\nREWARD IS AVAILABLE:\n")
-		log(reward.display())
+		log(reward.shortDescription())
 		log("\n------\n")
 		webbrowser.open_new_tab(url+"/pledge/new?ref=manage_pledge")
 		time.sleep(10)
@@ -75,12 +77,12 @@ def populateRewards(rewardsArray):
 	log("Parsing data...")
 	soup = BeautifulSoup(data)
 
-	rewards_html = soup.find_all('li',class_='NS-projects-reward')
-	getOneRewardInfo = lambda x : x.find_all('div',class_='NS_backer_rewards__reward')[0]
-	rewards_html = map(getOneRewardInfo,rewards_html)
+	rewards_html = soup.find_all('li',class_='reward')
+	getOneRewardInfo = lambda x : x.find_all('div',class_='reward__info')[0]
+	rewardsInfo_html = map(getOneRewardInfo,rewards_html)
 
 	skip = 0
-	for reward_html in rewards_html:
+	for reward_html in rewardsInfo_html:
 		if skip:
 			log("Skipped reward")
 			skip -= 1
@@ -88,22 +90,23 @@ def populateRewards(rewardsArray):
 
 		reward = Reward()
 			# amount
-		amount = reward_html.h5.contents[0]
+		amount = reward_html.h2.contents[0]
 		reward.amount = numberize(amount,1)
 
-		backerLimits_html = reward_html.find_all('p',class_='backers-limits')[0]
-		backersData = backerLimits_html.find('span', class_='num-backers')
+		backerLimits_html = reward_html.find_all('p',class_='reward__backer-count')[0]
+		backersData = backerLimits_html.contents[0]
+		# backersData = backerLimits_html.find_all('span', class_='ksr-icon__backer-badge')[0]
 		# backers
 		reward.backers = numberize(backersData.string)
 		# backer limit
-		if backerLimits_html.find('span', class_='sold-out'):
+		if backerLimits_html.find('span', class_='reward__limit--all-gone'):
 			reward.backerLimit = reward.backers
 		else:
-			backersLimitData = backerLimits_html.find('span', class_='limited-number')
+			backersLimitData = backerLimits_html.find('span', class_='reward_limit')
 			if backersLimitData:
 				reward.backerLimit = numberize(backersLimitData.string.split('left of')[1])	
 		
-		description = reward_html.find_all('div',class_='desc')[0].text.lstrip()
+		description = reward_html.find_all('div',class_='reward__description')[0].text.lstrip()
 		# name
 		reward.name = description.split('\n')[0].encode("utf8")
 		# description
